@@ -49,6 +49,12 @@ class WsgiTestCase(unittest.TestCase):
         self.assertEqual(greet3, u'Hello, user3')
 
 
+try:
+    import django
+    needsDjango = lambda func: func
+except ImportError:
+    needsDjango = unittest.skip("needs Django")
+
 class DjangoTestCase(unittest.TestCase):
     
     middleware_class = DjangoInjectMiddleware
@@ -60,6 +66,7 @@ class DjangoTestCase(unittest.TestCase):
     def tearDown(self):
         self.injector.unregister()
     
+    @needsDjango
     def test(self):
         '''Test Django middleware.'''
         request = None
@@ -69,7 +76,8 @@ class DjangoTestCase(unittest.TestCase):
         m.process_response(request, None)
         
         raise AssertionError()
-    
+
+    @needsDjango
     def test_response(self):
         '''Test Django middleware response.'''
         m = DjangoInjectMiddleware()
