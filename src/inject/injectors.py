@@ -40,6 +40,7 @@ they are accessed in this order: [application, thread, request].
 import logging
 import threading
 from functools import update_wrapper
+import sys
 
 from inject.exc import InjectorAlreadyRegistered, NoInjectorRegistered, \
     NotBoundError, AutobindingFailed
@@ -154,7 +155,7 @@ class Injector(object):
             try:
                 inst = type()
             except Exception, e:
-                raise AutobindingFailed(type, e)
+                raise AutobindingFailed(type, e), None, sys.exc_info()[2]
             
             self.bind(type, inst)
             return inst

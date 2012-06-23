@@ -1,8 +1,10 @@
+import inspect
 import unittest
+import sys
 
 import inject
-from inject.exc import NotBoundError, InjectorAlreadyRegistered, \
-    NoInjectorRegistered
+from inject.exc import AutobindingFailed, NotBoundError, \
+    InjectorAlreadyRegistered, NoInjectorRegistered
 from inject.injectors import Injector
 from inject.scopes import ThreadScope
 
@@ -102,6 +104,20 @@ class InjectorTestCase(unittest.TestCase):
         a2 = injector.get(A)
         self.assertTrue(a is a2)
         self.assertTrue(isinstance(a, A))
+
+    def testAutobindFailure(self):
+        def foo():
+            raise ValueError('foo error')
+        injector = Injector()
+        with self.assertRaisesRegexp(AutobindingFailed, 'foo error') as excm:
+            injector.get(foo)
+
+        ex = excm.exception
+        self.assertIsInstance(ex.caused_by, ValueError)
+        self.assertIn('foo error', str(ex))
+        last_tb = inspect.getinnerframes(sys.exc_info()[2])[-1]
+        self.assertEqual('foo', last_tb[3])
+        self.assertIs(ex.injected_type, foo)
     
     def testGetNotBoundNoAutobind(self):
         class A(object): pass

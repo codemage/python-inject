@@ -1,5 +1,6 @@
 '''Dependency injection exceptions.'''
 
+import sys
 
 class NoInjectorRegistered(Exception):
     
@@ -43,13 +44,13 @@ class FactoryNotCallable(Exception):
 
 
 class AutobindingFailed(Exception):
-    
     '''Injector has failed to autobind a type.''' 
     
     def __init__(self, type, caused_by):
         msg = u'Autobinding of %r failed because of %r' % (type, caused_by)
-        return super(AutobindingFailed, self).__init__(msg)
-
+        super(AutobindingFailed, self).__init__(msg)
+        self.caused_by = caused_by
+        self.injected_type = type
 
 class NoRequestError(Exception):
     
